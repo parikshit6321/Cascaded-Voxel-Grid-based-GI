@@ -1,0 +1,69 @@
+﻿#pragma kernel FilteredVoxelizationMain
+
+// Structure representing an individual voxel element
+struct Voxel
+{
+	int data;
+};
+
+// Readable/Writable structured buffer for storing the voxel grid
+RWStructuredBuffer<Voxel>	_VoxelVolumeBuffer;
+
+// Texture for storing the color with direct lighting
+Texture2D<float4>			_DirectLightingColorTexture;
+
+// Texture for storing the world position
+Texture2D<float4>			_PositionTexture;
+
+// Variable representing the dimension of the voxel grid
+uint						_VoxelVolumeDimension;
+
+// Current timestamp for voxel information
+int							_CurrentTimestamp;
+
+// Pack the color and timestamp data into a single integer
+int PackData(float3 color, int timestamp)
+{
+	int finalData = 0;
+	
+	int colorR = (int)(color.r * 255.0);
+	int colorG = (int)(color.g * 255.0);
+	int colorB = (int)(color.b * 255.0);
+	
+	colorR = min(colorR, 255);
+	colorG = min(colorG, 255);
+	colorB = min(colorB, 255);
+
+	finalData = colorR;
+	finalData = finalData << 8;
+	finalData = finalData | colorG;
+	finalData = finalData << 8;
+	finalData = finalData | colorB;
+	finalData = finalData << 8;
+	finalData = finalData | timestamp;
+
+	return finalData;
+}
+
+[numthreads(1, 1, 1)]
+// Entry point of the voxelization compute shader
+void FilteredVoxelizationMain(uint3 id : SV_DispatchThreadID)
+{
+	// Color of the current voxel with direct lighting
+	float4 directLightingColor = _DirectLightingColorTexture[id.xy];
+
+	// This world position is between 0...1
+	float3 worldPosition = _PositionTexture[id.xy].rgb;
+
+	// Pack the extracted color and timestamp into a single integer
+	int packedData = PackData(directLightingColor.rgb, _CurrentTimestamp);
+
+	// Compute the position in the voxel grid
+	float3 voxelPosition = worldPosition * _VoxelVolumeDimension;
+	uint3 temp = (int3)(voxelPosition);
+	// Compute the index in the voxel buffer according to the computed position of the voxel
+	uint index = (temp.x * _VoxelVolumeDimension * _VoxelVolumeDimension) + (temp.y * _VoxelVolumeDimension) + (temp.z);
+	
+	// Store the packed data into the voxel grid buffer
+	_VoxelVolumeBuffer[index].data = packedData;
+}

@@ -1,0 +1,13 @@
+﻿<Properties StartupItem="VXGI.CSharp.csproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\VXGI\Scripts\VXGI.cs">
+    <Files>
+      <File FileName="Temp\Compiled-FilteredVoxelization-.shader" Line="1" Column="1" />
+      <File FileName="Assets\VXGI\Scripts\VXGI.cs" Line="3" Column="1" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
